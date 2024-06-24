@@ -1,0 +1,15 @@
+FROM alpine:latest
+
+RUN apk add --no-cache wget jq
+
+RUN LATEST_VERSION=$(wget -qO- https://api.github.com/repos/fatedier/frp/releases/latest | jq -r .tag_name) \
+    && wget https://github.com/fatedier/frp/releases/download/${LATEST_VERSION}/frp_${LATEST_VERSION}_linux_amd64.tar.gz \
+    && tar -xzf frp_${LATEST_VERSION}_linux_amd64.tar.gz \
+    && mv frp_${LATEST_VERSION}_linux_amd64/frps /usr/local/bin/ \
+    && mkdir -p /etc/frp \
+    && mv frp_${LATEST_VERSION}_linux_amd64/frps.toml /etc/frp/frps.toml \
+    && rm -rf frp_${LATEST_VERSION}_linux_amd64 frp_${LATEST_VERSION}_linux_amd64.tar.gz
+
+EXPOSE 7000 7500
+
+CMD ["frps", "-c", "/etc/frp/frps.toml"]
